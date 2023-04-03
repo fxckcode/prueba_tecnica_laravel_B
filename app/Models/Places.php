@@ -4,22 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Places;
 
-class Categories extends Model
+class Places extends Model
 {
     use HasFactory;
 
-    protected $table = 'categories';
+    protected $table = 'places';
 
     protected $fillable = [
         'id',
         'name',
         'description',
+        'address',
+        'id_categories'
     ];
 
-    public function places(): BelongsTo
-    {
-        return $this->belongsTo(Places::class, 'id_categories');
-    }
 }

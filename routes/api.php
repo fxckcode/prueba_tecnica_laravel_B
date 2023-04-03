@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterUser;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\PlacesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +25,4 @@ Route::controller(AuthController::class)->group(function() {
 });
 
 Route::apiResource('categories', CategoriesController::class);
+Route::apiResource('places', PlacesController::class);
