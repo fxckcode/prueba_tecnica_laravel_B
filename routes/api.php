@@ -17,7 +17,7 @@ use App\Http\Controllers\PlacesController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::apiResource('register', RegisterUser::class);
+Route::post('register', [RegisterUser::class, 'register']);
 
 Route::controller(AuthController::class)->group(function() {
     Route::post('login', 'loginUser')->name('login');
