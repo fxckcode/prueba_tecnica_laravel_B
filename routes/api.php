@@ -21,8 +21,11 @@ use App\Http\Controllers\PlacesController;
 Route::controller(AuthController::class)->group(function() {
     Route::post('register', 'register');
     Route::post('login', 'loginUser')->name('login');
-    Route::get('logout', 'logoutUser');
+    // Route::get('logout', 'logoutUser');
 });
 
-Route::apiResource('categories', CategoriesController::class);
-Route::apiResource('places', PlacesController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('logout', [AuthController::class, 'logoutUser']);
+    Route::apiResource('categories', CategoriesController::class);
+    Route::apiResource('places', PlacesController::class);
+});
