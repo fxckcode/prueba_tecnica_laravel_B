@@ -47,25 +47,13 @@ class AuthController extends Controller
 
     public function loginUser(Request $request){
         try {
-            $request->validate([
-
-                'email'=>'required|string|email',
-                'password'=>'required|string'   
-               ]);
-
-            $fields = $request->only('email', 'password');
-            //Check email       
-            $user = User::where('email', $fields['email'])->first();
-       
-            if (Auth::attempt($fields)) {
-                $user = Auth::user();
-                $token = $user->createToken('authToken')->accessToken;
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                return response()->json(['message' => "Invalid login"], 401);
             }
 
-            //Check Password               
-            if(!$user || !Hash::check($fields['password'], $user->password) ){
-                return response(['message' => "Invalid login"], 401);
-            }
+            $user = User::where('email', $request['email'])->firstOrFail();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
 
             $response = [
                 'role' => $user->role,
