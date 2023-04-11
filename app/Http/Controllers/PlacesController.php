@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Places;
+use App\Models\AuthToken;
 
 class PlacesController extends Controller
 {
@@ -12,9 +13,21 @@ class PlacesController extends Controller
      */
     public function index()
     {
-        // Falta integrar modulo de autorización
-        $places = Places::all();
-        return response()->json($places, 200);
+        try {
+            $token = AuthToken::where('name', '=', 'user_token');
+            if ($token) {
+                $places = Places::all();
+                return response()->json($places, 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
     }
 
     /**
@@ -23,24 +36,30 @@ class PlacesController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'id' => 'required',
-                'name' => 'required',
-                'description' => 'required',
-                'address' => 'required',
-                'id_categories' => 'required'
-            ]);
+            $token = AuthToken::where('name', '=', 'admin_token');
 
-            $place = new Places();
-            $place->name = $request->name;
-            $place->description = $request->description;
-            $place->address = $request->address;
-            $place->id_categories = $request->id_categories;
-            $place->save();
+            if ($token) {
+                $request->validate([
+                    'id' => 'required',
+                    'name' => 'required',
+                    'description' => 'required',
+                    'address' => 'required',
+                    'id_categories' => 'required'
+                ]);
+    
+                $place = new Places();
+                $place->name = $request->name;
+                $place->description = $request->description;
+                $place->address = $request->address;
+                $place->id_categories = $request->id_categories;
+                $place->save();
+    
+                return response()->json([
+                    'message' => 'create success'
+                ], 201);
+            } else {
 
-            return response()->json([
-                'message' => 'create success'
-            ], 201);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Data cannot be processed'
@@ -53,8 +72,21 @@ class PlacesController extends Controller
      */
     public function show(string $id)
     {
-        $places = Places::where('id', '=', $id)->get();
-        return response()->json($places, 200);
+        try {
+            $token = AuthToken::where('name', '=', 'user_token');
+            if ($token) {
+                $places = Places::where('id', '=', $id)->get();
+                return response()->json($places, 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
     }
 
     /**
@@ -63,27 +95,34 @@ class PlacesController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $request->validate([
-                'name' => 'required',
-                'description' => 'required',
-                'address' => 'required',
-                'id_categories' => 'required'
-            ]);
+            $token = AuthToken::where('name', '=', 'user_token');
+            if ($token) {
+                $request->validate([
+                    'name' => 'required',
+                    'description' => 'required',
+                    'address' => 'required',
+                    'id_categories' => 'required'
+                ]);
+        
+                $place = Places::find($id);
+                $place->name = $request->name;
+                $place->description = $request->description;
+                $place->address = $request->address;
+                $place->id_categories = $request->id_categories;
+                $place->save();
     
-            $place = Places::find($id);
-            $place->name = $request->name;
-            $place->description = $request->description;
-            $place->address = $request->address;
-            $place->id_categories = $request->id_categories;
-            $place->save();
-
-            return response()->json([
-                'message' => 'update success'
-            ], 200);
+                return response()->json([
+                    'message' => 'update success'
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Data cannot be updated'
-            ]);
+            ], 400);
         }
     }
 
@@ -93,12 +132,19 @@ class PlacesController extends Controller
     public function destroy(string $id)
     {
         try {
-            $place = Places::find($id);
-            $place->delete();
-    
-            return response()->json([
-                'message' => 'delete success'
-            ], 200);
+            $token = AuthToken::where('name', '=', 'admin_token');
+            if ($token) {
+                $place = Places::find($id);
+                $place->delete();
+        
+                return response()->json([
+                    'message' => 'delete success'
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }   
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Data cannot be deleted'

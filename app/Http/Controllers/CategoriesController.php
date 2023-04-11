@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Categories;
+use App\Models\AuthToken;
 
 class CategoriesController extends Controller
 {
@@ -12,10 +13,21 @@ class CategoriesController extends Controller
      */
     public function index()
     { 
-        // Falta declarar si está autorizado o no
-        $categories = Categories::all();
-
-        return response()->json($categories, 200);
+        try {
+            $token = AuthToken::where('name', '=', 'user_token');
+            if ($token) {
+                $categories = Categories::all();
+                return response()->json($categories, 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
     }
 
     /**
@@ -23,21 +35,29 @@ class CategoriesController extends Controller
      */
     public function store(Request $request)
     {
-        // Falta declarar si está autorizado o no
         try {
-            $request->validate([
-                'name' => 'required|string',
-                'description' => 'required'
-            ]);
-    
-            $categorie = new Categories();
-            $categorie->name = $request->name;
-            $categorie->description = $request->description;
-            $categorie->save();
-    
-            return response()->json(['message' => 'Create success'], 201);
+            $token = AuthToken::where('name', '=', 'admin_token');
+            if ($token) {
+                $request->validate([
+                    'name' => 'required|string',
+                    'description' => 'required'
+                ]);
+        
+                $categorie = new Categories();
+                $categorie->name = $request->name;
+                $categorie->description = $request->description;
+                $categorie->save();
+        
+                return response()->json(['Message' => 'create success'], 201);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Data cannot be processed']);       
+            return response()->json([
+                'Message' => 'Data cannot be processed'
+            ], 422);       
         }
     }
 
@@ -46,9 +66,21 @@ class CategoriesController extends Controller
      */
     public function show(string $id)
     {
-        // Falta declarar si está autorizado o no
-        $categorie = Categories::where('id', '=', $id)->get();
-        return response()->json($categorie, 200);
+        try {   
+            $token = AuthToken::where('name', '=', 'user_token');
+            if ($token) {
+                $category = Categories::where('id', '=', $id)->first();
+                return response()->json($category, 200);
+            } else {
+                return response()->json([
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
     }
 
     /**

@@ -45,7 +45,8 @@ class AuthController extends Controller
         }
     }
 
-    public function loginUser(Request $request){
+    public function loginUser(Request $request)
+    {
         try {
             if (!Auth::attempt($request->only('email', 'password'))) {
                 return response()->json(['message' => "Invalid login"], 401);
@@ -53,10 +54,15 @@ class AuthController extends Controller
 
             $user = User::where('email', $request['email'])->firstOrFail();
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            if ($user->role === 'ADMIN'){
+                $token = $user->createToken('admin_token')->plainTextToken;
+            } else {
+                $token = $user->createToken('user_token')->plainTextToken;
+            }
 
             $response = [
                 'role' => $user->role,
+                'token' => $token
             ];
        
             return response($response, 200);
